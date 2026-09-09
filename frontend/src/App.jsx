@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import "./App.css";
-import { analyzeImages } from "./services/api";
+import { analyzeImages, askVisualQuestion } from "./services/api";
+import { downloadReport } from "./utils/report";
 
 const visualizationLayers = [
   {
@@ -56,6 +57,8 @@ const visualizationLayers = [
   },
 ];
 function App() {
+  const [mode, setMode] = useState("change");
+
   const [beforeImage, setBeforeImage] = useState(null);
   const [afterImage, setAfterImage] = useState(null);
 
@@ -94,6 +97,17 @@ function App() {
   const [followUpLoading, setFollowUpLoading] = useState(false);
   const [followUpError, setFollowUpError] = useState("");
   const [followUpThread, setFollowUpThread] = useState([]);
+
+  // ==========================================
+  // SINGLE-IMAGE VQA STATE
+  // ==========================================
+
+  const [vqaImage, setVqaImage] = useState(null);
+  const [vqaFile, setVqaFile] = useState(null);
+  const [vqaQuery, setVqaQuery] = useState("");
+  const [vqaResult, setVqaResult] = useState(null);
+  const [vqaLoading, setVqaLoading] = useState(false);
+  const [vqaError, setVqaError] = useState("");
 
   const handleClearHistory = () => {
   const confirmed = window.confirm(
@@ -166,6 +180,25 @@ function App() {
     setActiveHistoryId(null);
   };
 
+  const handleVqaUpload = (event) => {
+    const file = event.target.files[0];
+
+    if (!file) return;
+
+    setVqaFile(file);
+    setVqaImage(URL.createObjectURL(file));
+    setVqaResult(null);
+    setVqaError("");
+  };
+
+  const removeVqaImage = () => {
+    setVqaImage(null);
+    setVqaFile(null);
+    setVqaResult(null);
+    setVqaError("");
+    setActiveHistoryId(null);
+  };
+
   // ==========================================
   // ANALYSIS
   // ==========================================
@@ -235,7 +268,12 @@ function App() {
 
     if (!trimmed) return;
 
-    if (!beforeFile || !afterFile) {
+    if (mode === "vqa") {
+      if (!vqaFile) {
+        setFollowUpError("Please upload an image first.");
+        return;
+      }
+    } else if (!beforeFile || !afterFile) {
       setFollowUpError("Please upload both satellite images first.");
       return;
     }
@@ -245,11 +283,17 @@ function App() {
     try {
       setFollowUpLoading(true);
 
-      const response = await analyzeImages({
-        beforeImage: beforeFile,
-        afterImage: afterFile,
-        query: trimmed,
-      });
+      const response =
+        mode === "vqa"
+          ? await askVisualQuestion({
+              image: vqaFile,
+              query: trimmed,
+            })
+          : await analyzeImages({
+              beforeImage: beforeFile,
+              afterImage: afterFile,
+              query: trimmed,
+            });
 
       setFollowUpThread((previousThread) => {
         const updatedThread = [
@@ -285,6 +329,152 @@ function App() {
       }
     } finally {
       setFollowUpLoading(false);
+    }
+  };
+
+  // ==========================================
+  // SINGLE-IMAGE VQA
+  // ==========================================
+
+  const handleVqaAsk = async () => {
+    setVqaError("");
+    setVqaResult(null);
+
+    if (!vqaFile) {
+      setVqaError("Please upload a satellite image first.");
+      return;
+    }
+
+    if (!vqaQuery.trim()) {
+      setVqaError("Please enter a question about the image.");
+      return;
+    }
+
+    try {
+      setVqaLoading(true);
+
+      const response = await askVisualQuestion({
+        image: vqaFile,
+        query: vqaQuery.trim(),
+      });
+
+      setVqaResult(response);
+
+      const historyEntry = {
+        id: Date.now(),
+        type: "vqa",
+        query: vqaQuery.trim(),
+        result: response,
+        image: vqaImage,
+        followUpThread: [],
+        createdAt: new Date().toLocaleString(),
+      };
+
+      setAnalysisHistory((previousHistory) => [
+        historyEntry,
+        ...previousHistory,
+      ]);
+
+      setActiveHistoryId(historyEntry.id);
+    } catch (err) {
+      if (err.message === "Failed to fetch") {
+        setVqaError(
+          "Unable to connect to the analysis server. Please make sure the backend is running and try again."
+        );
+      } else {
+        setVqaError(
+          err.message ||
+            "Something went wrong while analyzing the image."
+        );
+      }
+    } finally {
+      setVqaLoading(false);
+    }
+  };
+
+  // ==========================================
+  // DOWNLOADABLE REPORT
+  // ==========================================
+
+  const resolveVisualizationUrl = (visualizationKey) => {
+    const visualization = result?.visualizations?.[visualizationKey];
+
+    if (!visualization) return null;
+
+    if (visualization.startsWith("/visualizations/")) {
+      return visualization;
+    }
+
+    if (visualization.startsWith("/")) {
+      return `http://localhost:8000${visualization}`;
+    }
+
+    return visualization;
+  };
+
+  const handleDownloadReport = (reportType) => {
+    try {
+      if (reportType === "vqa") {
+        if (!vqaResult) return;
+
+        downloadReport({
+          title: "Visual Question Answering Report",
+          subtitle: "Single-image analysis",
+          createdAt: new Date().toLocaleString(),
+          query: vqaResult.query || vqaQuery,
+          answer: vqaResult.message,
+          summaryStats: vqaResult.stats
+            ? Object.entries(vqaResult.stats).map(([label, value]) => ({
+                label,
+                value,
+              }))
+            : null,
+          images: [{ label: "Analyzed Image", src: vqaImage }],
+        });
+
+        return;
+      }
+
+      if (!result) return;
+
+      downloadReport({
+        title: "Change Detection Report",
+        subtitle: "Bi-temporal satellite change analysis",
+        createdAt: new Date().toLocaleString(),
+        query: result.query || query,
+        answer: result.message,
+        summaryStats: result.summary
+          ? [
+              {
+                label: "Regions detected",
+                value: result.summary.detectedRegions,
+              },
+              {
+                label: "Changed area",
+                value: `${result.summary.changedAreaPercentage}%`,
+              },
+              {
+                label: "Largest region (px)",
+                value: result.summary.largestRegionPixels,
+              },
+            ]
+          : null,
+        changes: result.changes,
+        images: [
+          { label: "Before", src: beforeImage },
+          { label: "After", src: afterImage },
+          {
+            label: "Change Overlay",
+            src: resolveVisualizationUrl("changeOverlay"),
+          },
+        ],
+      });
+    } catch (err) {
+      if (reportType === "vqa") {
+        setVqaError(err.message || "Could not generate the report.");
+      } else {
+        setError(err.message || "Could not generate the report.");
+      }
     }
   };
 
@@ -424,30 +614,8 @@ function App() {
     }
 
     // Processing outputs come from the current backend response.
-    if (
-      layer.visualizationKey &&
-      result?.visualizations
-    ) {
-      const visualization =
-        result.visualizations[
-          layer.visualizationKey
-        ];
-
-      if (!visualization) {
-        return null;
-      }
-
-      // Mock visualizations are served by the Vite frontend.
-      if (visualization.startsWith("/visualizations/")) {
-        return visualization;
-      }
-
-      // Real backend outputs are served by FastAPI.
-      if (visualization.startsWith("/")) {
-        return `http://localhost:8000${visualization}`;
-      }
-
-      return visualization;
+    if (layer.visualizationKey) {
+      return resolveVisualizationUrl(layer.visualizationKey);
     }
 
     return null;
@@ -534,6 +702,11 @@ function App() {
               setFollowUpError("");
               setActiveHistoryId(null);
               setShowVisualization(false);
+              setVqaImage(null);
+              setVqaFile(null);
+              setVqaQuery("");
+              setVqaResult(null);
+              setVqaError("");
             }}
           >
             <span>＋</span>
@@ -577,17 +750,30 @@ function App() {
                       : ""
                   }`}
                   onClick={() => {
-                    setQuery(entry.query);
-                    setResult(entry.result);
-                    setBeforeImage(entry.beforeImage || null);
-                    setAfterImage(entry.afterImage || null);
-                    setFollowUpThread(entry.followUpThread || []);
+                    if (entry.type === "vqa") {
+                      setMode("vqa");
+                      setVqaQuery(entry.query);
+                      setVqaResult(entry.result);
+                      setVqaImage(entry.image || null);
+                      setFollowUpThread(entry.followUpThread || []);
+                      setVqaError("");
+                    } else {
+                      setMode("change");
+                      setQuery(entry.query);
+                      setResult(entry.result);
+                      setBeforeImage(entry.beforeImage || null);
+                      setAfterImage(entry.afterImage || null);
+                      setFollowUpThread(entry.followUpThread || []);
+                      setError("");
+                      setShowVisualization(false);
+                    }
                     setActiveHistoryId(entry.id);
-                    setError("");
-                    setShowVisualization(false);
                   }}
                 >
                   <span className="history-question">
+                    <span className="history-type">
+                      {entry.type === "vqa" ? "VQA" : "Change"}
+                    </span>
                     {entry.query}
                   </span>
 
@@ -613,11 +799,46 @@ function App() {
           </h2>
 
           <p className="description">
-            Compare satellite imagery across time and ask natural-language
-            questions about meaningful changes in the landscape.
+            {mode === "vqa"
+              ? "Upload a single satellite image and ask a direct question about what it shows."
+              : "Compare satellite imagery across time and ask natural-language questions about meaningful changes in the landscape."}
           </p>
         </section>
 
+        {/* ====================================
+            MODE SELECTION
+        ==================================== */}
+
+        <section className="mode-tabs" role="tablist" aria-label="Analysis mode">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={mode === "change"}
+            className={`mode-tab ${mode === "change" ? "active" : ""}`}
+            onClick={() => setMode("change")}
+          >
+            <span className="mode-tab-title">Change Detection</span>
+            <span className="mode-tab-desc">
+              Compare a before/after image pair over time
+            </span>
+          </button>
+
+          <button
+            type="button"
+            role="tab"
+            aria-selected={mode === "vqa"}
+            className={`mode-tab ${mode === "vqa" ? "active" : ""}`}
+            onClick={() => setMode("vqa")}
+          >
+            <span className="mode-tab-title">Ask About an Image</span>
+            <span className="mode-tab-desc">
+              Visual question answering on a single image
+            </span>
+          </button>
+        </section>
+
+        {mode === "change" && (
+        <>
         {/* ====================================
             IMAGE INPUT
         ==================================== */}
@@ -973,9 +1194,270 @@ function App() {
                   →
                 </span>
               </button>
+
+              {/* ==================================
+                  DOWNLOAD REPORT
+              ================================== */}
+
+              <button
+                type="button"
+                className="explore-button download-report-button"
+                onClick={() => handleDownloadReport("change")}
+              >
+                <span>
+                  Download Report
+                </span>
+
+                <span className="explore-arrow">
+                  ↓
+                </span>
+              </button>
             </section>
           )}
         </section>
+        </>
+        )}
+
+        {mode === "vqa" && (
+        <>
+        {/* ====================================
+            SINGLE IMAGE INPUT
+        ==================================== */}
+
+        <section className="upload-section vqa-upload-section">
+          <div className="upload-card">
+            <div className="card-heading">
+              <span>01</span>
+              <h3>Satellite Image</h3>
+            </div>
+
+            <div className="image-upload">
+              {vqaImage ? (
+                <div className="image-preview">
+                  <img
+                    src={vqaImage}
+                    alt="Uploaded satellite imagery"
+                  />
+
+                  <button
+                    type="button"
+                    className="remove-image-button"
+                    onClick={removeVqaImage}
+                    aria-label="Remove image"
+                    title="Remove image"
+                  >
+                    <svg
+                      width="15"
+                      height="15"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M3 6h18" />
+                      <path d="M8 6V4h8v2" />
+                      <path d="M19 6l-1 14H6L5 6" />
+                      <path d="M10 11v5" />
+                      <path d="M14 11v5" />
+                    </svg>
+                  </button>
+
+                  <div className="image-label">
+                    IMAGE
+                  </div>
+                </div>
+              ) : (
+                <label className="upload-placeholder">
+                  <span className="upload-icon">↑</span>
+
+                  <strong>Upload satellite image</strong>
+
+                  <small>PNG, JPG, JPEG or GeoTIFF</small>
+
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleVqaUpload}
+                  />
+                </label>
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* ====================================
+            VQA QUERY
+        ==================================== */}
+
+        <section className="query-section">
+          <label htmlFor="vqa-query">Ask a question about this image</label>
+
+          <div className="query-box">
+            <input
+              id="vqa-query"
+              type="text"
+              placeholder='Try: "Is there a river in this image?"'
+              value={vqaQuery}
+              onChange={(event) => setVqaQuery(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  handleVqaAsk();
+                }
+              }}
+              disabled={vqaLoading}
+            />
+
+            <button
+              type="button"
+              onClick={handleVqaAsk}
+              disabled={vqaLoading}
+            >
+              {vqaLoading ? "Analyzing..." : "Ask →"}
+            </button>
+          </div>
+
+          <p className="query-hint">
+            Ask about vegetation, water, buildings, or the general scene.
+          </p>
+
+          <div className="query-suggestions">
+            <button
+              type="button"
+              onClick={() => setVqaQuery("What is visible in this image?")}
+              disabled={vqaLoading}
+            >
+              What is visible in this image?
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setVqaQuery("Is there a river in this image?")}
+              disabled={vqaLoading}
+            >
+              Is there a river in this image?
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setVqaQuery("Are there any buildings here?")}
+              disabled={vqaLoading}
+            >
+              Are there any buildings here?
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setVqaQuery("Describe the vegetation cover.")}
+              disabled={vqaLoading}
+            >
+              Describe the vegetation cover.
+            </button>
+          </div>
+
+          {/* LOADING */}
+
+          {vqaLoading && (
+            <div className="loading-message">
+              Analyzing image...
+            </div>
+          )}
+
+          {/* ERROR */}
+
+          {vqaError && (
+            <div className="error-message">
+              {vqaError}
+            </div>
+          )}
+
+          {/* ==================================
+              FOLLOW-UP TRIGGER
+          ================================== */}
+
+          {vqaResult && (
+            <button
+              type="button"
+              className="follow-up-trigger"
+              onClick={() => setShowFollowUpModal(true)}
+            >
+              <span className="follow-up-trigger-label">
+                FOLLOW-UP QUESTION
+              </span>
+              <span className="follow-up-trigger-title">
+                Ask a follow-up question
+                {followUpThread.length > 0 &&
+                  ` (${followUpThread.length})`}
+              </span>
+              <span className="explore-arrow">→</span>
+            </button>
+          )}
+
+          {/* ==================================
+              VQA RESULT
+          ================================== */}
+
+          {vqaResult && (
+            <section className="result-card">
+              <div className="result-header">
+                <span className="result-label">
+                  VQA RESULT
+                </span>
+
+                <span className="result-status">
+                  Complete
+                </span>
+              </div>
+
+              <p className="result-message">
+                {vqaResult.message}
+              </p>
+
+              {vqaResult.stats && (
+                <div className="result-summary">
+                  {Object.entries(vqaResult.stats).map(([label, value]) => (
+                    <div key={label}>
+                      <strong>{value}</strong>
+                      <span>{label}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {vqaResult.query && (
+                <div className="query-result">
+                  <span>Your question</span>
+
+                  <strong>
+                    "{vqaResult.query}"
+                  </strong>
+                </div>
+              )}
+
+              {/* ==================================
+                  DOWNLOAD REPORT
+              ================================== */}
+
+              <button
+                type="button"
+                className="explore-button download-report-button"
+                onClick={() => handleDownloadReport("vqa")}
+              >
+                <span>
+                  Download Report
+                </span>
+
+                <span className="explore-arrow">
+                  ↓
+                </span>
+              </button>
+            </section>
+          )}
+        </section>
+        </>
+        )}
       </main>
 
       {/* ======================================
@@ -1178,8 +1660,9 @@ function App() {
                 <div className="followup-empty">
                   <strong>No follow-up questions yet</strong>
                   <span>
-                    Ask something about the same before/after pair —
-                    the model will answer using the current images.
+                    {mode === "vqa"
+                      ? "Ask something else about this image — the model will answer using the same image."
+                      : "Ask something about the same before/after pair — the model will answer using the current images."}
                   </span>
                 </div>
               )}

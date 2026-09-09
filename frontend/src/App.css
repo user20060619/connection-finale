@@ -332,6 +332,68 @@ button:disabled {
 
 
 /* ============================================
+   MODE TABS
+   ============================================ */
+
+.mode-tabs {
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto 28px;
+
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.mode-tab {
+  padding: 16px 18px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+
+  border: 1px solid #CDD3DA;
+  border-radius: 14px;
+
+  background: #FFFFFF;
+
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.mode-tab:hover {
+  transform: translateY(-1px);
+  border-color: rgba(30, 95, 140, 0.30);
+}
+
+.mode-tab.active {
+  border-color: #1E5F8C;
+  background: rgba(30, 95, 140, 0.06);
+  box-shadow: 0 12px 30px rgba(30, 95, 140, 0.12);
+}
+
+.mode-tab-title {
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.mode-tab-desc {
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+@media (max-width: 760px) {
+  .mode-tabs {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* ============================================
    UPLOAD SECTION
    ============================================ */
 
@@ -339,6 +401,12 @@ button:disabled {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 24px;
+}
+
+.vqa-upload-section {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 560px;
+  margin: 0 auto;
 }
 
 .upload-card {
@@ -2077,6 +2145,36 @@ footer {
 }
 
 /* ================================
+   DOWNLOAD REPORT BUTTON
+   ================================ */
+
+.download-report-button {
+
+  border-color:
+    rgba(16, 185, 129, 0.28);
+
+  background:
+    rgba(16, 185, 129, 0.06);
+
+}
+
+.download-report-button:hover {
+
+  border-color:
+    rgba(16, 185, 129, 0.55);
+
+  background:
+    rgba(16, 185, 129, 0.12);
+
+}
+
+.download-report-button span:last-child {
+
+  color: #10B981;
+
+}
+
+/* ================================
    MOBILE RESULT
    ================================ */
 
@@ -2603,6 +2701,28 @@ footer {
   text-overflow: ellipsis;
 
   white-space: nowrap;
+
+}
+
+.history-type {
+
+  display: inline-block;
+
+  margin-right: 6px;
+
+  padding: 1px 6px;
+
+  border-radius: 5px;
+
+  color: #1E5F8C;
+
+  background:
+    rgba(30, 95, 140, 0.10);
+
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
 
 }
 
