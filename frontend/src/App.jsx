@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import "./App.css";
 import { analyzeImages, askVisualQuestion } from "./services/api";
 import { downloadReport } from "./utils/report";
+import MapView from "./MapView";
+import OverlayCanvas from "./OverlayCanvas";
 
 const visualizationLayers = [
   {
@@ -54,6 +56,11 @@ const visualizationLayers = [
     name: "Raw Difference",
     description: "Absolute pixel difference",
     visualizationKey: "difference",
+  },
+  {
+    id: "map",
+    name: "Map View",
+    description: "Approximate scene location",
   },
 ];
 function App() {
@@ -1577,6 +1584,14 @@ function App() {
 
                   {activeLayer === "compare" ? (
                     renderComparisonSlider()
+                  ) : activeLayer === "map" ? (
+                    <MapView hintText={query} />
+                  ) : activeLayer === "regions" ? (
+                    <OverlayCanvas
+                      imageSrc={afterImage}
+                      maskSrc={resolveVisualizationUrl("mask")}
+                      regions={result?.changes || []}
+                    />
                   ) : getActiveVisualization() ? (
                     <img
                       src={getActiveVisualization()}

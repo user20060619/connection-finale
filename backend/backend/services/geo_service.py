@@ -82,9 +82,11 @@ def analyze_single_image(image_path):
     excess_green = (2 * green) - red - blue
     vegetation_percentage = (np.count_nonzero(excess_green > 15) / total_pixels) * 100
 
-    # Water proxy: blue-dominant pixels
-    water_mask = (blue > red) & (blue > green) & (blue > 60)
-    water_percentage = (np.count_nonzero(water_mask) / total_pixels) * 100
+    # Water proxy: NDWI-style index (same green/red-as-nir convention used
+    # elsewhere in this module) rather than a raw "blue-dominant" threshold,
+    # which misses turbid/muddy water that isn't visually blue.
+    ndwi = calculate_ndwi(green.astype(np.float32), red.astype(np.float32))
+    water_percentage = (np.count_nonzero(ndwi > 0) / total_pixels) * 100
 
     # Structure proxy: edge density
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -101,23 +103,95 @@ def analyze_single_image(image_path):
     }
 
 
+def align_images(before, after):
+    """Register `before` onto `after`'s frame via SIFT features + homography.
+
+    Falls back to the unaligned (resized) image if there aren't enough
+    reliable feature matches, so a low-texture image pair degrades gracefully
+    instead of throwing during a live demo.
+    """
+    gray_before = cv2.cvtColor(before, cv2.COLOR_BGR2GRAY)
+    gray_after = cv2.cvtColor(after, cv2.COLOR_BGR2GRAY)
+
+    height, width = gray_after.shape
+
+    try:
+        sift = cv2.SIFT_create()
+        kp_before, desc_before = sift.detectAndCompute(gray_before, None)
+        kp_after, desc_after = sift.detectAndCompute(gray_after, None)
+
+        if desc_before is None or desc_after is None:
+            raise RuntimeError("Not enough visual features to align images")
+
+        matcher = cv2.BFMatcher()
+        matches = matcher.knnMatch(desc_before, desc_after, k=2)
+
+        good_matches = [m for m, n in matches if len(matches) and m.distance < 0.7 * n.distance]
+
+        if len(good_matches) < 10:
+            raise RuntimeError("Not enough reliable feature matches to align images")
+
+        points_before = np.float32(
+            [kp_before[m.queryIdx].pt for m in good_matches]
+        ).reshape(-1, 1, 2)
+        points_after = np.float32(
+            [kp_after[m.trainIdx].pt for m in good_matches]
+        ).reshape(-1, 1, 2)
+
+        homography, mask = cv2.findHomography(points_before, points_after, cv2.RANSAC, 5.0)
+
+        if homography is None or mask is None:
+            raise RuntimeError("Could not compute a reliable transformation")
+
+        aligned_before = cv2.warpPerspective(before, homography, (width, height))
+
+        valid_mask = cv2.warpPerspective(
+            np.ones((before.shape[0], before.shape[1]), dtype=np.uint8) * 255,
+            homography,
+            (width, height),
+        )
+        valid_mask = cv2.erode(valid_mask, np.ones((15, 15), np.uint8), iterations=1)
+
+        return aligned_before, valid_mask, True
+
+    except Exception:
+        # Fall back to a plain resize-based comparison (previous behavior).
+        return before, np.ones((height, width), dtype=np.uint8) * 255, False
+
+
 def generate_visualizations(before_path, after_path, job_dir):
     """Generate all visualizations with real calculations"""
     before = cv2.imread(before_path)
     after = cv2.imread(after_path)
-    
+
     if before is None or after is None:
         raise ValueError(f"Could not load images")
-    
+
     height = min(before.shape[0], after.shape[0])
     width = min(before.shape[1], after.shape[1])
     before = cv2.resize(before, (width, height))
     after = cv2.resize(after, (width, height))
-    
+
+    aligned_before, valid_mask, aligned_ok = align_images(before, after)
+
+    alignment_overlay = cv2.addWeighted(aligned_before, 0.5, after, 0.5, 0)
+    alignment_path = os.path.join(job_dir, "alignment_overlay.jpg")
+    cv2.imwrite(alignment_path, alignment_overlay)
+
+    # Use the registered image for every downstream comparison so change
+    # detection isn't picking up misalignment as "change".
+    before = aligned_before
+
     before_gray = cv2.cvtColor(before, cv2.COLOR_BGR2GRAY)
     after_gray = cv2.cvtColor(after, cv2.COLOR_BGR2GRAY)
-    
+
     diff = cv2.absdiff(before_gray, after_gray)
+    # Warping `before` onto `after`'s frame leaves black, uncovered border
+    # pixels wherever the source image doesn't reach. Zero those out here so
+    # they don't register as (false) large differences downstream, in the
+    # raw diff, the heatmap's normalization range, and the change mask.
+    diff[valid_mask == 0] = 0
+
     diff_path = os.path.join(job_dir, "raw_difference.jpg")
     cv2.imwrite(diff_path, diff)
 
@@ -125,7 +199,7 @@ def generate_visualizations(before_path, after_path, job_dir):
     kernel = np.ones((5, 5), np.uint8)
     mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
     mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
-    
+
     mask_rgba = np.zeros((height, width, 4), dtype=np.uint8)
     mask_rgba[:, :, 0] = 255
     mask_rgba[:, :, 1] = 0
@@ -144,24 +218,21 @@ def generate_visualizations(before_path, after_path, job_dir):
     heatmap_path = os.path.join(job_dir, "change_heatmap.jpg")
     cv2.imwrite(heatmap_path, heatmap_colored)
     
-    alignment = np.hstack([before, after])
-    alignment_path = os.path.join(job_dir, "alignment_overlay.jpg")
-    cv2.imwrite(alignment_path, alignment)
-    
     regions_image = after.copy()
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     
     regions = []
-    for i, contour in enumerate(contours):
+    for contour in contours:
         area = cv2.contourArea(contour)
         if area > 100:
             x, y, w, h = cv2.boundingRect(contour)
+            region_id = len(regions) + 1
             cv2.rectangle(regions_image, (x, y), (x+w, y+h), (0, 255, 0), 2)
-            cv2.putText(regions_image, f"#{i+1}", (x, y-10), 
+            cv2.putText(regions_image, f"#{region_id}", (x, y-10),
                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-            
+
             regions.append({
-                "id": i + 1,
+                "id": region_id,
                 "type": "Detected change",
                 "confidence": 0.85,
                 "area": int(area),
