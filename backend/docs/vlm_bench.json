@@ -1,0 +1,97 @@
+{
+  "model": "Qwen/Qwen2.5-VL-3B-Instruct",
+  "quantisation": "4bit-nf4",
+  "gpu": "NVIDIA GeForce RTX 3060",
+  "load_seconds": 4.2,
+  "weights_vram_gb": 2.25,
+  "peak_vram_gb": 2.35,
+  "n_images": 14,
+  "median_seconds": 1.37,
+  "max_seconds": 3.34,
+  "results": [
+    {
+      "image": "data/raw/rsicd_sample/airport_348.jpg",
+      "seconds": 3.34,
+      "new_tokens": 51,
+      "caption": "The satellite image shows an airport with multiple runways and taxiways. Several airplanes are visible on the tarmac, indicating active operations. The surrounding area includes various buildings, possibly hangars and terminal facilities, and there is a body of water nearby."
+    },
+    {
+      "image": "data/raw/rsicd_sample/bareland_48.jpg",
+      "seconds": 2.38,
+      "new_tokens": 66,
+      "caption": "The satellite image depicts a landscape with a mix of green and brown areas, suggesting a natural environment. There is a noticeable pattern of lines that could indicate roads or paths, and there are some darker patches that might represent water bodies or shaded areas. The overall coloration indicates it could be a rural or semi-rural area."
+    },
+    {
+      "image": "data/raw/rsicd_sample/baseballfield_68.jpg",
+      "seconds": 1.95,
+      "new_tokens": 61,
+      "caption": "The satellite image shows a well-maintained sports field with a baseball diamond at the center. The field is surrounded by a grassy area and has a few trees scattered around it. There are also some buildings visible in the background, indicating that the field might be located near residential or commercial areas."
+    },
+    {
+      "image": "data/raw/rsicd_sample/bridge_340.jpg",
+      "seconds": 1.45,
+      "new_tokens": 77,
+      "caption": "The satellite image depicts an urban area with buildings and roads. The buildings vary in height and color, indicating different types of structures such as residential, commercial, and possibly industrial buildings. The roads are clearly marked with white lines, suggesting lanes for traffic. There is also a body of water visible, which could be a river or a lake, adding to the complexity of the landscape."
+    },
+    {
+      "image": "data/raw/rsicd_sample/center_53.jpg",
+      "seconds": 1.44,
+      "new_tokens": 77,
+      "caption": "The satellite image depicts a cityscape with numerous buildings and structures. The buildings have varied heights and architectural styles, suggesting a mix of residential, commercial, and possibly industrial zones. The streets and roads are clearly visible, indicating a well-developed urban area. The image also shows some green spaces, which could be parks or gardens, adding to the diversity of the city's landscape."
+    },
+    {
+      "image": "data/raw/rsicd_sample/church_76.jpg",
+      "seconds": 1.22,
+      "new_tokens": 62,
+      "caption": "The satellite image shows an urban area with buildings of varying heights and rooftops. There is a large building in the center with a green roof, surrounded by smaller structures. The streets are lined with parked cars, and there are patches of greenery, possibly trees or small parks, visible between the buildings."
+    },
+    {
+      "image": "data/raw/rsicd_sample/denseresidential_403.jpg",
+      "seconds": 1.54,
+      "new_tokens": 84,
+      "caption": "The satellite image shows an aerial view of a residential area with numerous houses. The roofs of the houses are visible, and they appear to be uniformly shaped, suggesting that they might all belong to the same neighborhood or community. The streets between the houses are clearly defined, indicating a well-organized layout. There is one house with a red roof that stands out among the others, possibly due to its size or design."
+    },
+    {
+      "image": "data/raw/rsicd_sample/desert_6.jpg",
+      "seconds": 1.28,
+      "new_tokens": 66,
+      "caption": "The satellite image depicts a landscape with a mix of green and brown areas, suggesting a natural environment. The green areas likely represent vegetation, while the brown sections could indicate either arid conditions or areas that have been cleared for human use. The overall appearance suggests a region that might be experiencing seasonal changes or different land use patterns."
+    },
+    {
+      "image": "data/raw/rsicd_sample/farmland_62.jpg",
+      "seconds": 1.32,
+      "new_tokens": 70,
+      "caption": "The satellite image depicts a large expanse of land with a grid-like pattern, likely indicating agricultural fields or farmland. The green areas suggest vegetation, possibly crops, while the darker patches could indicate water bodies such as lakes or rivers. The overall layout suggests a well-organized farming area, possibly used for crop rotation or different types of agriculture."
+    },
+    {
+      "image": "data/raw/rsicd_sample/industrial_45.jpg",
+      "seconds": 1.12,
+      "new_tokens": 57,
+      "caption": "The satellite image shows an urban area with multiple buildings and structures. There is a prominent highway running through the center of the image, with several bridges and overpasses connecting different parts of the city. The surrounding area includes green spaces and other infrastructure elements typical of a developed cityscape."
+    },
+    {
+      "image": "data/raw/rsicd_sample/meadow_72.jpg",
+      "seconds": 1.12,
+      "new_tokens": 57,
+      "caption": "The satellite image depicts a large body of water with a greenish hue, likely indicating the presence of algae or other aquatic vegetation. The water appears calm and there is no visible landmass or human activity. The overall coloration suggests it could be a lake or a large river."
+    },
+    {
+      "image": "data/raw/rsicd_sample/mountain_52.jpg",
+      "seconds": 1.18,
+      "new_tokens": 61,
+      "caption": "The satellite image depicts a mountainous landscape with varying elevations and terrain features. The area appears to be covered in vegetation, possibly forests or dense shrubbery, which is common in mountainous regions. The topography includes ridges, valleys, and peaks, suggesting a complex and rugged terrain."
+    },
+    {
+      "image": "data/raw/rsicd_sample/park_62.jpg",
+      "seconds": 1.37,
+      "new_tokens": 73,
+      "caption": "The satellite image depicts an urban area with various land uses. There is a large green space in the center, possibly a park or recreational area, surrounded by residential buildings and other structures. To the left, there is a large open field that could be used for sports or community events. The surrounding area includes roads and pathways, indicating a well-developed infrastructure."
+    },
+    {
+      "image": "data/raw/rsicd_sample/playground_368.jpg",
+      "seconds": 1.07,
+      "new_tokens": 53,
+      "caption": "The satellite image shows an aerial view of a soccer field with a well-maintained green surface. The field is surrounded by a running track, and there are trees and buildings visible around the perimeter. The field appears to be part of a larger sports complex."
+    }
+  ]
+}

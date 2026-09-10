@@ -1890,7 +1890,7 @@ footer {
 
 .result-summary {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 12px;
 
   margin-bottom: 28px;
@@ -1931,6 +1931,13 @@ footer {
 .result-summary > div:nth-child(3) {
   border: 1px solid #CDE8DD;
   background: #F1FAF6;
+}
+
+/* Brightness (VQA's 4th stat) */
+
+.result-summary > div:nth-child(4) {
+  border: 1px solid #E3D5F5;
+  background: #F8F3FD;
 }
 
 .result-summary strong {

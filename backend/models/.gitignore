@@ -1,0 +1,33 @@
+# weights are shared over Drive, never committed
+models/weights/
+*.safetensors
+*.pt
+*.pth
+*.onnx
+
+# data
+data/raw/
+data/tiles/
+data/instructions/*.jsonl
+data/demo_pairs/
+
+# python
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# hf cache if it lands locally
+.cache/
+scratch/
+
+# db
+*.db
+*.faiss
+
+# node
+node_modules/
+dist/
+
+# HF model cache, ~7GB, never commit
+.hf/

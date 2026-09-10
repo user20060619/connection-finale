@@ -1,0 +1,204 @@
+# Query router rules.  Owner: P1.
+#
+# Tier 1 of three (see docs/router_design.md).  Deterministic, inspectable,
+# and the tier that answers "why did this query route here?" on stage.
+#
+# Matching is over the lowercased query with punctuation stripped.
+# 'strong' terms alone are sufficient.  'weak' terms need a supporting signal.
+
+version: 1
+
+intents:
+
+  water:
+    tool: geo_service.ndwi
+    strong:
+      - ndwi
+      - water body
+      - water bodies
+      - water level
+      - flood extent
+      - flooding
+      - reservoir level
+      - shoreline
+    weak:
+      - water
+      - lake
+      - river
+      - reservoir
+      - pond
+      - flood
+      - shrink
+      - shrank
+      - dried
+      - drying
+    prefers_two_images: true
+
+  vegetation:
+    tool: geo_service.ndvi
+    strong:
+      - ndvi
+      - vegetation
+      - vegetated
+      - forest cover
+      - green cover
+      - deforestation
+      - crop cover
+      - tree cover
+      - foliage
+    weak:
+      - forest
+      - trees
+      - crops
+      - plants
+      - greenery
+      - farmland
+      - vegetation loss
+      - growth
+    # 'has vegetation decreased' is a change question about vegetation,
+    # and must beat the generic change intent.  Handled by priority below.
+    prefers_two_images: true
+
+  change:
+    tool: change_service.detect
+    strong:
+      - what changed
+      - what has changed
+      - change detection
+      - difference between
+      - what is different
+      - compare these
+      - construction
+      - urban expansion
+      - new buildings built
+    weak:
+      - changed
+      - change
+      - differ
+      - different
+      - before and after
+      - since
+      - expanded
+      - grown
+      - developed
+    requires_two_images: true
+
+  locate:
+    tool: detect_service.detect
+    strong:
+      - where are
+      - where is
+      - locate
+      - find the
+      - how many buildings
+      - count the
+      - bounding box
+      - detect
+    weak:
+      - buildings
+      - houses
+      - structures
+      - roads
+      - vehicles
+      - aircraft
+      - ships
+      - show me the
+    prefers_single_image: true
+
+  describe:
+    tool: vlm_service.caption
+    strong:
+      - describe
+      - what is visible
+      - what can you see
+      - what does this show
+      - what is in this
+      - summarise
+      - summarize
+      - caption
+      - what type of area
+      - what land use
+    weak:
+      - explain
+      - tell me about
+      - what is this
+      - overview
+
+# Out-of-scope patterns.  These route to 'unclear' with a specific reason
+# rather than being force-fit into one of the four supported intents.
+# Plan section 9 lists what the prototype does not do; this is that list,
+# made executable.
+out_of_scope:
+  prediction:
+    patterns: [will be, predict, forecast, in 2030, future, next year, expect to]
+    message: >-
+      This prototype analyses imagery that already exists. It does not forecast
+      future land use.
+  unsupported_sensor:
+    patterns: [hyperspectral, thermal, lidar, radar backscatter, modis, hyperion]
+    message: >-
+      The prototype supports Sentinel-2 optical imagery, with Sentinel-1 SAR as
+      a stretch goal. Other sensors are out of scope.
+  external_data:
+    patterns: [population, gdp, census, weather forecast, rainfall data, temperature record]
+    message: >-
+      Answering that needs data sources outside the imagery. This system only
+      analyses the images given to it.
+  multi_turn:
+    patterns: [all the images, every image i uploaded, across all, compare all]
+    message: >-
+      The prototype handles one query over one or two images. Reasoning across
+      many images is out of scope.
+
+# Tier-1 scoring.
+scoring:
+  strong_hit: 0.60
+  weak_hit: 0.22
+  two_image_bonus: 0.15      # intent expects 2 images and 2 were supplied
+  single_image_bonus: 0.10
+  image_count_penalty: 0.35  # intent requires 2 images but only 1 supplied
+  comparative_bonus: 0.18    # comparative language present
+  max_confidence: 0.97       # never claim certainty; this is a classifier
+
+thresholds:
+  accept: 0.45      # above this, route
+  ambiguous: 0.12   # two intents within this margin -> ask which one
+  # below accept -> abstain, return 'unclear' with a clarifying question
+
+# Comparative language, a signal independent of any single intent.
+comparative_terms:
+  - changed
+  - change
+  - before
+  - after
+  - since
+  - compared
+  - versus
+  - vs
+  - increase
+  - increased
+  - decrease
+  - decreased
+  - dropped
+  - fallen
+  - grown
+  - expanded
+  - reduced
+  - shrink
+  - shrank
+  - shrunk
+  - risen
+  - rose
+  - more
+  - less
+  - still
+
+# Priority when scores tie exactly.  Vegetation outranks change because
+# "has vegetation decreased" is a vegetation question with a change verb,
+# and NDVI gives a better answer there than a binary change mask.
+priority:
+  - water
+  - vegetation
+  - locate
+  - change
+  - describe

@@ -1,0 +1,15 @@
+# P1's ML dependencies.  P4 owns the backend half of this file.
+# torch/torchvision are installed separately with the CUDA index:
+#   VIRTUAL_ENV=.venv uv pip install torch torchvision --torch-backend=cu126
+
+transformers>=4.49          # Qwen2.5-VL support
+accelerate>=1.0
+bitsandbytes>=0.44          # 4-bit quantisation
+peft>=0.13                  # LoRA
+qwen-vl-utils               # vision preprocessing for Qwen2.5-VL
+sentencepiece
+pillow
+numpy
+pyyaml                      # router rules
+
+# added by P4: fastapi, uvicorn, rasterio, ...

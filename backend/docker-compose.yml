@@ -1,0 +1,32 @@
+# OWNER: P4
+# STATUS: placeholder created by P1 on 31 Aug. P4 owns this file.
+#
+# Note from P1 before anyone invests time here: the demo runs OFFLINE on P3's
+# RTX 5050, and the GPU has to be visible to the container. That needs the
+# NVIDIA container toolkit installed on the laptop, which is one more thing to
+# get working by 8 September.
+#
+# Running the backend directly with uvicorn is simpler and has fewer failure
+# modes on stage. Suggest treating Docker as optional rather than the demo path.
+# Plan section 10 is right that reliability beats sophistication at this stage.
+
+version: "3.8"
+
+services:
+  backend:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./models/weights:/app/models/weights
+    # GPU access requires the NVIDIA container toolkit on the host:
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+
+  # frontend:  P5 adds this when the React app exists

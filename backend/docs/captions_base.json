@@ -1,0 +1,217 @@
+{
+  "adapter": null,
+  "mean_overlap": 0.4403,
+  "median_seconds": 1.71,
+  "rows": [
+    {
+      "image": "data/raw/rsicd_sample/airport_348.jpg",
+      "class": "airport",
+      "prediction": "This satellite image depicts an airport from an aerial perspective. The layout of the airport is clearly visible, with multiple runways and taxiways. There are several aircraft parked on the tarmac, indicating active operations. The surrounding area includes various buildings, possibly terminal buildings, hangars, and other airport facilities. The image also shows some green areas, which might be grassy areas or water bodies, typical for airport environments to provide space for aircraft parking and maintenance activities. The overall structure",
+      "references": [
+        "The airport is very large.",
+        "next to the airport is the green grass.",
+        "next to the airport is green grass .",
+        "The airport is very large.",
+        "the airport is very large ."
+      ],
+      "overlap": 0.667,
+      "seconds": 3.75,
+      "refused": false
+    },
+    {
+      "image": "data/raw/rsicd_sample/bareland_48.jpg",
+      "class": "bareland",
+      "prediction": "The image provided is an aerial photograph, but it appears to be of very low resolution or the image might be corrupted. Therefore, I am unable to accurately identify the specific land cover and terrain features present in the photograph. If you have another image or if you can describe the features more clearly, I would be able to provide a more accurate analysis.",
+      "references": [
+        "There's a road on the bare earth.",
+        "There is no plant on this vast earth.",
+        "there is no plant on this vast land .",
+        "There is a way in the naked land.",
+        "there is a road on the bare land ."
+      ],
+      "overlap": 0.333,
+      "seconds": 2.25,
+      "refused": false
+    },
+    {
+      "image": "data/raw/rsicd_sample/baseballfield_68.jpg",
+      "class": "baseballfield",
+      "prediction": "The satellite image depicts a baseball field with several notable features: Bases: There are four bases visible, including the home plate and three other bases that form the infield. Foul Lines: The foul lines are clearly marked, indicating the boundaries of the foul territory. Dugouts: Two dugouts are visible on either side of the field, providing seating for players and coaches. Foul Pole: A foul pole is",
+      "references": [
+        "This land has a great baseball field.",
+        "a row of trees were planted around the baseball field.",
+        "a row of trees were planted around the baseball field .",
+        "This land has a great baseball field.",
+        "this land has a large baseball field ."
+      ],
+      "overlap": 0.5,
+      "seconds": 1.71,
+      "refused": false
+    },
+    {
+      "image": "data/raw/rsicd_sample/bridge_340.jpg",
+      "class": "bridge",
+      "prediction": "This is an aerial view of a city, likely captured by a satellite or drone. The image shows a mix of urban and natural features: Urban Area: There are numerous buildings, roads, and infrastructure that form the core of the city. The buildings vary in height, with some being taller and more prominent than others. Natural Features: There are green areas, possibly parks or forests, which provide a contrast to",
+      "references": [
+        "a long bridge was built over the river.",
+        "on both sides of the river are bare land.",
+        "on both sides of the river are bare land .",
+        "a long bridge over the river was built.",
+        "a long bridge was built over the river ."
+      ],
+      "overlap": 0.0,
+      "seconds": 1.71,
+      "refused": false
+    },
+    {
+      "image": "data/raw/rsicd_sample/center_53.jpg",
+      "class": "center",
+      "prediction": "The image appears to be a satellite or aerial photograph of a cityscape, likely taken from an airplane or a high-altitude drone. The focus is on a large building with a distinctive architectural design, characterized by its triangular roof and numerous windows arranged in a grid-like pattern. The building stands out prominently against the backdrop of other structures, which are less detailed but suggest a dense urban environment. The surrounding area includes roads and possibly other buildings, though they are not as clearly defined due",
+      "references": [
+        "next to the road is a metal triangle building located on a square.",
+        "beside the road is a triangle metallic building lying on a square .",
+        "the triangle center with ripple is next to the street .",
+        "there is a majestic triangular center with silver striped roof .",
+        "several buildings and many people are near a triangular center building ."
+      ],
+      "overlap": 0.5,
+      "seconds": 1.71,
+      "refused": false
+    },
+    {
+      "image": "data/raw/rsicd_sample/church_76.jpg",
+      "class": "church",
+      "prediction": "This is an aerial view of a cityscape, likely captured by a satellite or drone. The image shows a mix of residential and commercial buildings. There are several multi-story buildings with flat roofs, which could be apartment complexes or office buildings. Some buildings have green roofs, indicating they might be used for commercial purposes such as offices or warehouses. There are also smaller structures that appear to be single-family homes or small businesses. In the foreground, there is a",
+      "references": [
+        "A church shaped like a green blue cross with a pyramidal roof is located on a square surrounded by red roof houses and a parking lot.",
+        "a cross shaped blue green church with a pyramidal roof is located at a square  surrounded by red roof houses and a parking lot .",
+        "a cyan cruciform church with a dark roof which is in the center is near some brick yellow buildings .",
+        "here we can see a blue cross like church sits in a big square .",
+        "a cyan church near several green trees and cars is surrounded by red building ."
+      ],
+      "overlap": 0.222,
+      "seconds": 1.7,
+      "refused": false
+    },
+    {
+      "image": "data/raw/rsicd_sample/denseresidential_403.jpg",
+      "class": "denseresidential",
+      "prediction": "This is an aerial view of a residential area, likely taken from a high-altitude satellite or drone. The image shows several rows of houses with pitched roofs, which are typical for suburban or urban residential neighborhoods. The streets are lined with these houses, and there are visible roads that connect the houses. The rooftops are mostly dark-colored, possibly indicating that they are made of asphalt shingles. There is one house in the center of the image that stands out due to its redd",
+      "references": [
+        "curved roads and straight roads divide the residential area with compact houses into several blocks.",
+        "curved roads and straight roads divide the residential area with compactly arranged houses in several blocks.",
+        "the curved roads and straight roads divide the residential area with compactly arranged houses into several blocks .",
+        "this residential area where roofs are mostly black is separated by curved roads .",
+        "many buildings are orderly in a dense residential area ."
+      ],
+      "overlap": 0.556,
+      "seconds": 1.71,
+      "refused": false
+    },
+    {
+      "image": "data/raw/rsicd_sample/desert_6.jpg",
+      "class": "desert",
+      "prediction": "The image you provided is a very simple and abstract representation of a landscape. It appears to be a stylized depiction of a field or plain, with a few lines that could represent trees or other vegetation. The color palette is muted, with shades of yellow and beige dominating the scene. The overall effect is somewhat minimalist and could be interpreted in various ways depending on the viewer's perspective.",
+      "references": [
+        "There are a few parallel folds on the golden desert.",
+        "there are some parallel folds on the golden desert .",
+        "the desert has the strip of the alternating stripes .",
+        "it is a spectacular flat light yellow desert with several staight strips scretch .",
+        "it is a piece of yellow desert ."
+      ],
+      "overlap": 0.333,
+      "seconds": 1.44,
+      "refused": false
+    },
+    {
+      "image": "data/raw/rsicd_sample/farmland_62.jpg",
+      "class": "farmland",
+      "prediction": "This is a satellite image of a landscape, likely taken from space or from an extremely high altitude. The terrain appears to be flat and covered with green vegetation, which could indicate a grassland, savanna, or a region with dense plant life. There are no visible structures, bodies of water, or significant geographical features such as mountains or rivers. The image shows a grid-like pattern, which might suggest that the area has been divided into sections for some purpose, possibly for agricultural",
+      "references": [
+        "the agricultural land that is clear green looks like a leaf.",
+        "here is a farmland with two residential sites .",
+        "the farmland which is light green looks like a sheet .",
+        "it is a spectacular farmland neatly devided as squared blocks .",
+        "some pieces of green farmlands are together ."
+      ],
+      "overlap": 0.429,
+      "seconds": 1.73,
+      "refused": false
+    },
+    {
+      "image": "data/raw/rsicd_sample/industrial_45.jpg",
+      "class": "industrial",
+      "prediction": "This satellite image shows an urban area with several key features: Highways and Roads: There are multiple highways and roads visible, including a major highway that runs horizontally across the image. The roads have multiple lanes, indicating they are likely primary routes. Buildings: Various buildings are scattered throughout the image. Some buildings appear to be industrial or commercial in nature, while others look residential. The buildings vary in size and shape, suggesting a mix of uses within",
+      "references": [
+        "there is a road crossing on a road and a railway with two trains along which are some factory buildings.",
+        "there is a road crossing over a road and a railway with two trains  along which are some factory buildings .",
+        "the plants in the industrial are divided by the streets .",
+        "we can see bustling roads and a railway passes through this prosperous industrial arra .",
+        "many white industrial buildings are in an industrial area ."
+      ],
+      "overlap": 0.75,
+      "seconds": 1.72,
+      "refused": false
+    },
+    {
+      "image": "data/raw/rsicd_sample/meadow_72.jpg",
+      "class": "meadow",
+      "prediction": "The image shows a green field with some trees in the background. The terrain appears to be flat, and the vegetation suggests it might be a rural or agricultural area.",
+      "references": [
+        "a row of trees were planted next to the pasture.",
+        "a large area of grass grows on the earth.",
+        "a large area of grass grows on the land .",
+        "a row of trees were planted next to the grass.",
+        "a row of trees were planted beside the pasture ."
+      ],
+      "overlap": 0.25,
+      "seconds": 0.78,
+      "refused": false
+    },
+    {
+      "image": "data/raw/rsicd_sample/mountain_52.jpg",
+      "class": "mountain",
+      "prediction": "This satellite image depicts a mountainous landscape with a mix of green and brown hues, indicating different types of vegetation and terrain. The image shows a range of mountains with varying elevations, some of which have snow-capped peaks, suggesting higher altitudes. The valleys between the mountains appear to be covered with dense forests or other vegetation. The overall texture of the image suggests a rugged and natural environment, possibly in a region with significant elevation changes.",
+      "references": [
+        "Here is a mountain with khaki and white on the ridges and green in the valleys.",
+        "Here is a mountain with khaki and white on the ridges and green on the valleys.",
+        "here is a mountain with khaki and white on the ridges and green in the valleys .",
+        "several footpaths traverse through this mountain range .",
+        "it is a piece of irregular green mountains ."
+      ],
+      "overlap": 0.5,
+      "seconds": 1.63,
+      "refused": false
+    },
+    {
+      "image": "data/raw/rsicd_sample/park_62.jpg",
+      "class": "park",
+      "prediction": "This satellite image depicts an urban area with various features: Buildings and Structures: There are several buildings, including what appears to be a large industrial or commercial complex in the center-left part of the image. The buildings have different heights and shapes, indicating a mix of residential, commercial, and possibly industrial uses. Green Spaces: There are numerous green areas, which could include parks, gardens, or other public spaces. These green spaces are interspersed",
+      "references": [
+        "the park with a rectangular bareland is surrounded by roads .",
+        "the park with two round buildings and two square ones occupy a whole blocks .",
+        "the park in the square region with greenings and a bare land is surrounded by the downtown .",
+        "lush trees scattered in this green park next to a bare ground .",
+        "residential areas are around a park with many green trees and several buildings ."
+      ],
+      "overlap": 0.625,
+      "seconds": 1.72,
+      "refused": false
+    },
+    {
+      "image": "data/raw/rsicd_sample/playground_368.jpg",
+      "class": "playground",
+      "prediction": "The satellite image depicts an aerial view of a soccer field. The field is rectangular with clearly marked lines for the playing area, including the goal areas at each end. The field is surrounded by a running track or pathway, which is visible around the perimeter. There are trees and other vegetation surrounding the field, indicating that it is located in a park or recreational area. The field appears to be well-maintained, with green artificial turf covering the playing surface.",
+      "references": [
+        "the football playground is surrounded by gray track .",
+        "you can see some sports grounds with rows of trees around them built on concrete.",
+        "we can see some sports field with rows of trees around built on concrete .",
+        "this soccer playground is surrounded by the cement running tracks next to rows of lush trees .",
+        "a football field is near some green trees and two buildings ."
+      ],
+      "overlap": 0.5,
+      "seconds": 1.68,
+      "refused": false
+    }
+  ]
+}
