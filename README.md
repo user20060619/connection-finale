@@ -40,6 +40,12 @@ Open `http://localhost:5173`. If that port is already taken, Vite will pick anot
 
 Both endpoints return JSON + a set of generated visualization images served from `/outputs/<job_id>/...`.
 
+The Change results view's "Visualization Layers" panel has two frontend-only additions on top of the backend's images:
+- **Map View** — a Leaflet map showing an approximate reference location for the scene (the JPGs carry no GPS/GeoTIFF metadata, so this is explicitly labeled illustrative, not a geocoded fix).
+- **Change Regions** — now a real client-side `<canvas>` (`OverlayCanvas.jsx`) that composites the backend's change mask under the bounding boxes, drawn from the JSON region coordinates, with a "Show change mask" toggle — instead of only showing the backend's flat pre-rendered JPG.
+
+These close out P5's remaining named deliverables from the plan (`MapView.jsx`, `OverlayCanvas.jsx`).
+
 ---
 
 ## Fixes made while connecting frontend ↔ backend
@@ -74,6 +80,8 @@ This section exists so nobody discovers these during Q&A. Checked directly again
 | **Auditable execution trace** | **Not built** | API responses don't expose which tool/model ran or why. |
 | **Confidence values** | Displayed, **not computed** | Every detected region's `"confidence"` is a hardcoded literal `0.85` in `geo_service.py`, not a model output. |
 | **Downloadable report** | **Done** | Client-side print-to-PDF, `frontend/src/utils/report.js`. |
+| **Vegetation change % (NDVI)** | Computed, **barely surfaced** | Computed on every `/analyze` call, but only ever mentioned in the answer *sentence*, and only if the query text contains a vegetation keyword — there's no persistent stat card for it like Regions/Area/Largest have. The NDVI itself is also a proxy (Blue channel standing in for a real NIR band, since these are plain RGB JPGs), not scientifically real NDVI. |
+| **Query-specific display ("one clear answer area")** | **Not built** | The plan's design (Section 1: router picks *one* tool per query) implies the UI should show only the metric relevant to what was asked. Right now `/analyze` always returns and displays the same fixed bundle (regions/area/largest + NDVI + NDWI, every visualization tab) regardless of the query — only the answer sentence changes. Root cause is the same router disconnect above: nothing in the live system ever actually decides "run/show only this one tool." |
 
 **Bottom line:** the two-image Change flow and the single-image VQA tab work end-to-end and are demo-ready — verified live with real test images. But two of the four originally-planned intents (Change via a trained model, Locate) never got built beyond stub files, and the router/fusion architecture — meant to be this project's core original contribution — is fully coded but currently disconnected from every endpoint the frontend uses.
 
